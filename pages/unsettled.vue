@@ -8,7 +8,7 @@
         <DeleteDialog @get-all-items="getAllItems" />
       </v-col>
     </v-row>
-    <Items :items="items" @get-all-items="getAllItems" />
+    <ItemsList :items="items" @get-all-items="getAllItems" />
   </v-container>
 </template>
 
@@ -20,8 +20,8 @@ export default Vue.extend({
   name: 'UnsettledPage',
   components: {
     SummaryArea: () => import('../components/SummaryArea.vue'),
-    DeleteDialog: () => import('../components/CommonComponents/DeleteDialog.vue'),
-    Items: () => import('../components/Items/Items.vue'),
+    DeleteDialog: () => import('../components/DeleteDialog.vue'),
+    ItemsList: () => import('../components/ItemsList.vue'),
   },
   computed: {
     items(): Item[] {

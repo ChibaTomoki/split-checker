@@ -62,7 +62,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { ItemAddedId, ItemPerson } from '../../model'
+import { ItemAddedId, ItemPerson } from '../model'
 
 interface Data {
   isOpen: boolean
@@ -73,8 +73,8 @@ interface Data {
 export default Vue.extend({
   name: 'EditDialog',
   components: {
-    StringInput: () => import('../CommonComponents/StringInput.vue'),
-    PositiveIntInput: () => import('../CommonComponents/PositiveIntInput.vue'),
+    StringInput: () => import('./StringInput.vue'),
+    PositiveIntInput: () => import('./PositiveIntInput.vue'),
   },
   props: {
     item: {

@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { ItemAddedId } from '../../model'
+import { ItemAddedId } from '../model'
 
 interface Data {
   selected: boolean[]
@@ -55,7 +55,7 @@ interface Data {
 export default Vue.extend({
   name: 'ItemsComponent',
   components: {
-    DeleteDialog: () => import('../CommonComponents/DeleteDialog.vue'),
+    DeleteDialog: () => import('./DeleteDialog.vue'),
     EditDialog: () => import('./EditDialog.vue'),
   },
   props: {

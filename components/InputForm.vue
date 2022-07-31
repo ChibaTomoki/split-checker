@@ -41,8 +41,8 @@ interface Data {
 export default Vue.extend({
   name: 'InputFormComponent',
   components: {
-    StringInput: () => import('./CommonComponents/StringInput.vue'),
-    PositiveIntInput: () => import('./CommonComponents/PositiveIntInput.vue'),
+    StringInput: () => import('./StringInput.vue'),
+    PositiveIntInput: () => import('./PositiveIntInput.vue'),
   },
   props: {
     initItem: {

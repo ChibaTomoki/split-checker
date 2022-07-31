@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { ItemAddedId } from '../../model'
+import { ItemAddedId } from '../model'
 
 interface Data {
   isOpen: boolean
