@@ -6,6 +6,7 @@
       :label="label"
       :rules="rules"
       counter="16"
+      prefix="￥"
       placeholder="半角数字のみ入力可能"
       @blur="emitValue"
       @keydown="handleKeydown($event)"
