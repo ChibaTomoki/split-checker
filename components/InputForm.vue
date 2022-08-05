@@ -1,6 +1,11 @@
 <template>
   <v-form ref="form" v-model="valid" lazy-validation @submit.prevent="postItem">
-    <StringInput :value="tempItem.name" label="購入品" :required="true" @update-value="updateName($event)" />
+    <StringInput
+      :value="tempItem.name"
+      label="購入品"
+      :rules="[(v) => !!v || '購入品名が必要です']"
+      @update-value="updateName($event)"
+    />
     <template v-for="person in tempItem.persons">
       <PositiveIntInput
         :key="'paid' + person.index"
@@ -18,7 +23,7 @@
       />
     </template>
     <StringInput :value="tempItem.note" label="メモ" @update-value="updateNote($event)" />
-    <v-btn type="submit"> 追加 </v-btn>
+    <v-btn type="submit" @click="validate"> 追加 </v-btn>
     <!-- <b-alert :show="doneFirstSubmit && hasNameEmptyError" variant="danger" class="my-1" style="width: 14rem">
       購入品を入力してください
     </b-alert> -->
@@ -137,6 +142,10 @@ export default Vue.extend({
           this.$emit('posted-item')
         })
         .catch((response) => console.log(response))
+    },
+    validate(): void {
+      const formRef = this.$refs.form as any
+      formRef.validate()
     },
   },
 })
