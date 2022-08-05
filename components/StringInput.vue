@@ -3,7 +3,7 @@
     <v-text-field
       v-model="inputValue"
       :label="label"
-      :required="required"
+      :rules="rules"
       @input="emitValue"
       @blur="emitValue"
       @keydown="handleKeydown($event)"
@@ -23,7 +23,7 @@ export default Vue.extend({
   props: {
     value: { type: String, default: '' },
     label: { type: String, default: '' },
-    required: { type: Boolean, default: false },
+    rules: { type: [Boolean, Array], default: true },
   },
   data: (): Data => ({
     inputValue: '',
