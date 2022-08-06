@@ -1,61 +1,60 @@
 <template>
-  <div>
-    <v-text-field
-      v-model="strTemp"
-      inputmode="numeric"
-      :label="label"
-      :rules="rules"
-      counter="16"
-      maxlength="16"
-      prefix="￥"
-      placeholder="半角数字のみ入力可能"
-      @blur="emitValue"
-      @keydown="handleKeydown($event)"
-    />
-  </div>
+  <v-text-field
+    v-model="strTempRef"
+    inputmode="numeric"
+    :label="label"
+    :rules="rulesRef"
+    counter="16"
+    maxlength="16"
+    prefix="￥"
+    placeholder="半角数字のみ入力可能"
+    @blur="emitValue"
+    @keydown="handleKeydown($event)"
+  />
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 
-interface Data {
-  strTemp: string
-  rules: ((value: any) => any)[]
-}
-
-export default Vue.extend({
+export default defineComponent({
   name: 'PositiveIntInputComponent',
   props: {
     value: { type: Number, default: 0 },
     label: { type: String, default: '' },
   },
-  data: (): Data => ({
-    strTemp: '0',
-    rules: [
-      (value) => !!value || '必須項目',
-      (value) => !value.match(/\D/) || '半角数字のみ入力可能',
-      (value) => !value.match(/^0\d/) || '不要な先頭の0は入力不可',
-    ],
-  }),
-  watch: {
-    value(newValue: number): void {
-      this.strTemp = String(newValue)
-    },
-  },
-  created(): void {
-    this.strTemp = String(this.value)
-  },
-  methods: {
-    emitValue(): void {
-      if (!this.strTemp || this.strTemp.match(/\D/) || this.strTemp.match(/^0\d/)) return
-      this.$emit('update-value', Number(this.strTemp))
-    },
-    handleKeydown(e: KeyboardEvent): void {
-      if (e.key === 'Enter') {
-        this.emitValue()
-        this.$emit('handle-keydown-enter')
+  setup(props, ctx) {
+    const strTempRef = ref(String(props.value))
+    const rulesRef = [
+      (value: string) => !!value || '必須項目',
+      (value: string) => !value.match(/\D/) || '半角数字のみ入力可能',
+      (value: string) => !value.match(/^0\d/) || '不要な先頭の0は入力不可',
+    ]
+
+    watch(
+      () => props.value,
+      (next: number): void => {
+        strTempRef.value = String(next)
       }
-    },
+    )
+
+    const emitValue = (): void => {
+      if (!strTempRef.value || strTempRef.value.match(/\D/) || strTempRef.value.match(/^0\d/)) return
+      ctx.emit('update-value', Number(strTempRef.value))
+    }
+
+    const handleKeydown = (e: KeyboardEvent): void => {
+      if (e.key === 'Enter') {
+        emitValue()
+        ctx.emit('handle-keydown-enter')
+      }
+    }
+
+    return {
+      strTempRef,
+      rulesRef,
+      emitValue,
+      handleKeydown,
+    }
   },
 })
 </script>
