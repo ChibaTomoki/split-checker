@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-text-field
-      v-model="inputValue"
+      v-model="inputValueRef"
       :label="label"
       :rules="rules"
       @input="emitValue"
@@ -12,40 +12,41 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 
-interface Data {
-  inputValue: string
-}
-
-export default Vue.extend({
-  name: 'StringInputComponent',
+export default defineComponent({
+  name: 'StringInput',
   props: {
     value: { type: String, default: '' },
     label: { type: String, default: '' },
-    rules: { type: [Boolean, Array], default: true },
+    rules: { type: Array, default: () => [true] },
   },
-  data: (): Data => ({
-    inputValue: '',
-  }),
-  watch: {
-    value(newValue: string): void {
-      this.inputValue = newValue
-    },
-  },
-  created(): void {
-    this.inputValue = this.value
-  },
-  methods: {
-    emitValue(): void {
-      this.$emit('update-value', this.inputValue)
-    },
-    handleKeydown(e: KeyboardEvent): void {
-      if (e.key === 'Enter') {
-        this.emitValue()
-        this.$emit('handle-keydown-enter')
+  setup(props, context) {
+    const inputValueRef = ref('')
+
+    watch(
+      () => props.value,
+      (next: string): void => {
+        inputValueRef.value = next
       }
-    },
+    )
+
+    const emitValue = (): void => {
+      context.emit('update-value', inputValueRef)
+    }
+
+    const handleKeydown = (e: KeyboardEvent): void => {
+      if (e.key === 'Enter') {
+        emitValue()
+        context.emit('handle-keydown-enter')
+      }
+    }
+
+    return {
+      inputValueRef,
+      emitValue,
+      handleKeydown,
+    }
   },
 })
 </script>
