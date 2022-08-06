@@ -21,7 +21,7 @@ export default defineComponent({
     label: { type: String, default: '' },
     rules: { type: Array, default: () => [true] },
   },
-  setup(props, context) {
+  setup(props, ctx) {
     const inputValueRef = ref('')
 
     watch(
@@ -32,13 +32,13 @@ export default defineComponent({
     )
 
     const emitValue = (): void => {
-      context.emit('update-value', inputValueRef)
+      ctx.emit('update-value', inputValueRef)
     }
 
     const handleKeydown = (e: KeyboardEvent): void => {
       if (e.key === 'Enter') {
         emitValue()
-        context.emit('handle-keydown-enter')
+        ctx.emit('handle-keydown-enter')
       }
     }
 
