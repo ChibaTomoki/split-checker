@@ -12,7 +12,6 @@ interface Emits {
 }
 
 const props = defineProps<Props>()
-
 const emits = defineEmits<Emits>()
 
 const strTempRef = ref(String(props.value))

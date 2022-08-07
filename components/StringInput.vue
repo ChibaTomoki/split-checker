@@ -6,6 +6,7 @@ interface Props {
   label: string
   rules?: ((value: string) => boolean | string)[]
 }
+
 interface Emits {
   (e: 'update-value', value: string): void
   (e: 'handle-keydown-enter'): void
@@ -15,6 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
   rules: () => [() => true],
 })
 const emits = defineEmits<Emits>()
+
 const inputValueRef = ref('')
 
 watch(
