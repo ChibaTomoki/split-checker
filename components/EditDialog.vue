@@ -1,5 +1,104 @@
+<script setup lang="ts">
+import { ref, reactive, watchEffect, computed } from 'vue'
+import axios, { AxiosResponse, AxiosError } from 'axios'
+import { ItemAddedId, ItemPerson } from '../model'
+import StringInput from './StringInput.vue'
+import PositiveIntInput from './PositiveIntInput.vue'
+
+interface Props {
+  item: ItemAddedId
+}
+
+interface Emits {
+  (e: 'get-all-items'): void
+}
+
+const props = defineProps<Props>()
+const emits = defineEmits<Emits>()
+
+const isOpenRef = ref(false)
+const doneFirstSubmitRef = ref(false)
+const tempItem: ItemAddedId = reactive({
+  _id: '',
+  name: '',
+  persons: [],
+  note: '',
+})
+
+watchEffect(() => {
+  if (isOpenRef.value) {
+    tempItem.name = props.item.name
+    tempItem.persons = props.item.persons
+    tempItem.note = props.item.note
+  }
+})
+
+const hasTotalAmountError = computed((): boolean => {
+  return getTotalPaid() !== getTotalToPay()
+})
+
+const hasNameEmptyError = computed((): boolean => tempItem.name === '')
+
+const updateName = (newName: string): void => {
+  tempItem.name = newName
+}
+
+const updatePaid = (newPaid: number, index: number): void => {
+  if (tempItem.persons[index]) tempItem.persons[index].paid = newPaid
+  initializeToPay()
+}
+
+const updateToPay = (newToPay: number, index: number): void => {
+  if (tempItem.persons[index]) tempItem.persons[index].toPay = newToPay
+}
+
+const updateNote = (newNote: string): void => {
+  tempItem.note = newNote
+}
+
+const initializeToPay = (): void => {
+  const paidSum: number = tempItem.persons.reduce((sum: number, person: ItemPerson) => sum + person.paid, 0)
+  const roundedAliquot: number = Math.round(paidSum / tempItem.persons.length)
+  let remainder: number = paidSum - roundedAliquot * tempItem.persons.length
+
+  tempItem.persons.forEach((person: ItemPerson) => {
+    let addition: number = 0
+    if (remainder > 0) {
+      addition++
+      remainder--
+    } else if (remainder < 0) {
+      addition--
+      remainder++
+    }
+    person.toPay = roundedAliquot + addition
+  })
+}
+
+const getTotalPaid = (): number => {
+  return tempItem.persons.reduce((totalPaid: number, current: ItemPerson): number => totalPaid + current.paid, 0)
+}
+
+const getTotalToPay = (): number => {
+  return tempItem.persons.reduce((totalToPay: number, current: ItemPerson): number => totalToPay + current.toPay, 0)
+}
+
+const putItem = (): void => {
+  doneFirstSubmitRef.value = true
+  if (hasTotalAmountError || hasNameEmptyError) return
+
+  axios
+    .put('/api', tempItem)
+    .then((response: AxiosResponse<ItemAddedId>) => {
+      console.log(response)
+      emits('get-all-items')
+    })
+    .catch((error: AxiosError) => console.log(error))
+    .finally(() => (isOpenRef.value = false))
+}
+</script>
+
 <template>
-  <v-dialog v-model="isOpen" width="576">
+  <v-dialog v-model="isOpenRef" width="576">
     <template #activator="{ on, attrs }">
       <v-btn fab v-bind="attrs" v-on="on">
         <v-icon> mdi-pencil </v-icon>
@@ -48,7 +147,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn text @click="putItem">OK</v-btn>
-        <v-btn text @click="isOpen = false">Cancel</v-btn>
+        <v-btn text @click="isOpenRef = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
     <!-- <b-alert :show="doneFirstSubmit && hasNameEmptyError" variant="danger" class="my-1">
@@ -59,108 +158,3 @@
     </b-alert> -->
   </v-dialog>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue'
-import { ItemAddedId, ItemPerson } from '../model'
-
-interface Data {
-  isOpen: boolean
-  tempItem: ItemAddedId
-  doneFirstSubmit: boolean
-}
-
-export default Vue.extend({
-  name: 'EditDialog',
-  components: {
-    StringInput: () => import('./StringInput.vue'),
-    PositiveIntInput: () => import('./PositiveIntInput.vue'),
-  },
-  props: {
-    item: {
-      type: Object as PropType<ItemAddedId>,
-      default: () => ({ _id: '', name: '', persons: [{ index: 0, name: '', paid: 0, toPay: 0 }], note: '' }),
-    },
-  },
-  data: (): Data => ({
-    isOpen: false,
-    tempItem: {
-      _id: '',
-      name: '',
-      persons: [],
-      note: '',
-    },
-    doneFirstSubmit: false,
-  }),
-  computed: {
-    hasTotalAmountError(): boolean {
-      return this.getTotalPaid() !== this.getTotalToPay()
-    },
-    hasNameEmptyError(): boolean {
-      return this.tempItem.name === ''
-    },
-  },
-  watch: {
-    isOpen(newValue: boolean): void {
-      if (newValue) this.tempItem = JSON.parse(JSON.stringify(this.item))
-    },
-  },
-  methods: {
-    updateName(newName: string): void {
-      this.$set(this.tempItem, 'name', newName)
-    },
-    updatePaid(newPaid: number, index: number): void {
-      this.$set(this.tempItem.persons[index], 'paid', newPaid)
-      this.initializeToPay()
-    },
-    updateToPay(newToPay: number, index: number): void {
-      this.$set(this.tempItem.persons[index], 'toPay', newToPay)
-    },
-    updateNote(newNote: string): void {
-      this.$set(this.tempItem, 'note', newNote)
-    },
-    initializeToPay(): void {
-      const paidSum: number = this.tempItem.persons.reduce((sum: number, person: ItemPerson) => sum + person.paid, 0)
-      const roundedAliquot: number = Math.round(paidSum / this.tempItem.persons.length)
-      let remainder: number = paidSum - roundedAliquot * this.tempItem.persons.length
-
-      this.tempItem.persons.forEach((person: ItemPerson) => {
-        let addition: number = 0
-        if (remainder > 0) {
-          addition++
-          remainder--
-        } else if (remainder < 0) {
-          addition--
-          remainder++
-        }
-        this.$set(person, 'toPay', roundedAliquot + addition)
-      })
-    },
-    getTotalPaid(): number {
-      return this.tempItem.persons.reduce(
-        (totalPaid: number, current: ItemPerson): number => totalPaid + current.paid,
-        0
-      )
-    },
-    getTotalToPay(): number {
-      return this.tempItem.persons.reduce(
-        (totalToPay: number, current: ItemPerson): number => totalToPay + current.toPay,
-        0
-      )
-    },
-    putItem() {
-      this.doneFirstSubmit = true
-      if (this.hasTotalAmountError || this.hasNameEmptyError) return
-
-      this.$axios
-        .put('/api', this.tempItem)
-        .then((response) => {
-          console.log(response)
-          this.$emit('get-all-items')
-        })
-        .catch((response) => console.log(response))
-        .finally(() => (this.isOpen = false))
-    },
-  },
-})
-</script>
