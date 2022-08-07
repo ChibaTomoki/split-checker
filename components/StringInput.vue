@@ -4,14 +4,16 @@ import { ref, watch } from 'vue'
 interface Props {
   value: string
   label: string
-  rules: ((value: string) => boolean | string)[]
+  rules?: ((value: string) => boolean | string)[]
 }
 interface Emits {
   (e: 'update-value', value: string): void
   (e: 'handle-keydown-enter'): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  rules: () => [() => true],
+})
 const emits = defineEmits<Emits>()
 const inputValueRef = ref('')
 
