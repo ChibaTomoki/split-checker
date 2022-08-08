@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watchEffect } from 'vue'
 
 interface Props {
   value: string
@@ -19,16 +19,14 @@ const emits = defineEmits<Emits>()
 
 const inputValueRef = ref('')
 
-watch(
-  () => props.value,
-  (next: string): void => {
-    inputValueRef.value = next
-  }
-)
+watchEffect((): void => {
+  inputValueRef.value = props.value
+})
 
 const emitValue = (): void => {
   emits('update-value', inputValueRef.value)
 }
+
 const handleKeydown = (e: KeyboardEvent): void => {
   if (e.key === 'Enter') {
     emitValue()

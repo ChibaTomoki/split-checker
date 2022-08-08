@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watchEffect } from 'vue'
 
 interface Props {
   value: number
@@ -21,12 +21,9 @@ const rulesRef = [
   (value: string) => !value.match(/^0\d/) || '不要な先頭の0は入力不可',
 ]
 
-watch(
-  () => props.value,
-  (next: number): void => {
-    strTempRef.value = String(next)
-  }
-)
+watchEffect((): void => {
+  strTempRef.value = String(props.value)
+})
 
 const emitValue = (): void => {
   if (!strTempRef.value || strTempRef.value.match(/\D/) || strTempRef.value.match(/^0\d/)) return
