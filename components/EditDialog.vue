@@ -17,27 +17,22 @@ const props = defineProps<Props>()
 const emits = defineEmits<Emits>()
 
 const isOpenRef = ref(false)
-const doneFirstSubmitRef = ref(false)
 const tempItem: ItemAddedId = reactive({
   _id: '',
   name: '',
   persons: [],
   note: '',
 })
+const formRef: any = ref(null)
 
 watchEffect(() => {
   if (isOpenRef.value) {
+    tempItem._id = props.item._id
     tempItem.name = props.item.name
     tempItem.persons = props.item.persons
     tempItem.note = props.item.note
   }
 })
-
-const hasTotalAmountError = computed((): boolean => {
-  return getTotalPaid() !== getTotalToPay()
-})
-
-const hasNameEmptyError = computed((): boolean => tempItem.name === '')
 
 const updateName = (newName: string): void => {
   tempItem.name = newName
@@ -74,26 +69,18 @@ const initializeToPay = (): void => {
   })
 }
 
-const getTotalPaid = (): number => {
-  return tempItem.persons.reduce((totalPaid: number, current: ItemPerson): number => totalPaid + current.paid, 0)
-}
-
-const getTotalToPay = (): number => {
-  return tempItem.persons.reduce((totalToPay: number, current: ItemPerson): number => totalToPay + current.toPay, 0)
-}
-
 const putItem = (): void => {
-  doneFirstSubmitRef.value = true
-  if (hasTotalAmountError || hasNameEmptyError) return
+  const isOk: boolean = formRef.value.validate()
+  if (!isOk) return
 
   axios
-    .put('/api', tempItem)
-    .then((response: AxiosResponse<ItemAddedId>) => {
+    .put(`/api/${tempItem._id}`, tempItem)
+    .then((response) => {
       console.log(response)
       emits('get-all-items')
+      isOpenRef.value = false
     })
     .catch((error: AxiosError) => console.log(error))
-    .finally(() => (isOpenRef.value = false))
 }
 </script>
 
@@ -107,54 +94,50 @@ const putItem = (): void => {
     <v-card>
       <v-card-title></v-card-title>
       <v-card-text>
-        <StringInput
-          :value="tempItem.name"
-          label="購入品"
-          :required="true"
-          @update-value="updateName($event)"
-          @handle-keydown-enter="putItem"
-        >
-          購入品
-        </StringInput>
-        <div v-for="person in tempItem.persons" :key="'paid' + person.index">
-          <PositiveIntInput
-            :value="person.paid"
-            :label="person.name + 'が払った額'"
-            @update-value="updatePaid($event, person.index)"
+        <v-form ref="formRef">
+          <StringInput
+            :value="tempItem.name"
+            label="購入品"
+            :rules="[(v) => !!v || '購入品名が必要です']"
+            @update-value="updateName($event)"
             @handle-keydown-enter="putItem"
           >
-            {{ person.name }}が払った額
-          </PositiveIntInput>
-        </div>
-        <div v-for="person in tempItem.persons" :key="'toPay' + person.index">
-          <PositiveIntInput
-            :value="person.toPay"
-            :label="person.name + 'が払う額'"
-            @update-value="updateToPay($event, person.index)"
+            購入品
+          </StringInput>
+          <div v-for="person in tempItem.persons" :key="'paid' + person.index">
+            <PositiveIntInput
+              :value="person.paid"
+              :label="person.name + 'が払った額'"
+              @update-value="updatePaid($event, person.index)"
+              @handle-keydown-enter="putItem"
+            >
+              {{ person.name }}が払った額
+            </PositiveIntInput>
+          </div>
+          <div v-for="person in tempItem.persons" :key="'toPay' + person.index">
+            <PositiveIntInput
+              :value="person.toPay"
+              :label="person.name + 'が払う額'"
+              @update-value="updateToPay($event, person.index)"
+              @handle-keydown-enter="putItem"
+            >
+              {{ person.name }}が払う額
+            </PositiveIntInput>
+          </div>
+          <StringInput
+            :value="tempItem.note"
+            label="メモ"
+            @update-value="updateNote($event)"
             @handle-keydown-enter="putItem"
           >
-            {{ person.name }}が払う額
-          </PositiveIntInput>
-        </div>
-        <StringInput
-          :value="tempItem.note"
-          label="メモ"
-          @update-value="updateNote($event)"
-          @handle-keydown-enter="putItem"
-        >
-          メモ
-        </StringInput>
+            メモ
+          </StringInput>
+        </v-form>
       </v-card-text>
       <v-card-actions>
         <v-btn text @click="putItem">OK</v-btn>
         <v-btn text @click="isOpenRef = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
-    <!-- <b-alert :show="doneFirstSubmit && hasNameEmptyError" variant="danger" class="my-1">
-      購入品を入力してください
-    </b-alert>
-    <b-alert :show="doneFirstSubmit && hasTotalAmountError" variant="danger" class="my-1">
-      払った額と払う額の合計を同じにしてください
-    </b-alert> -->
   </v-dialog>
 </template>
