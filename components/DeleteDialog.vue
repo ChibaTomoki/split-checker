@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isOpen">
+  <v-dialog v-model="isOpenRef">
     <template #activator="{ on, attrs }">
       <v-btn v-if="item !== null" fab v-bind="attrs" v-on="on">
         <v-icon> mdi-delete </v-icon>
@@ -21,49 +21,49 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue, { PropType } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
+import axios, { AxiosResponse, AxiosError } from 'axios'
 import { ItemAddedId } from '../model'
 
 interface Data {
   isOpen: boolean
 }
 
-export default Vue.extend({
-  name: 'DeleteDialogComponent',
-  props: {
-    // TODO: required falseのときdefaultはどうなるか確認
-    item: {
-      type: Object as PropType<ItemAddedId | null>,
-      required: false,
-      default: () => null,
-    },
-  },
-  data: (): Data => ({
-    isOpen: false,
-  }),
-  methods: {
-    deleteItem(deleteId: string): void {
-      this.$axios
-        .delete('/api', { data: { _id: deleteId } })
-        .then((response) => {
-          console.log(response)
-          this.$emit('get-all-items')
-        })
-        .catch((response) => console.log(response))
-      this.isOpen = false
-    },
-    // TODO: エンドポイントを/apiだけに変更
-    deleteAllItems(): void {
-      this.$axios
-        .delete('/api/all')
-        .then((response) => {
-          console.log(response)
-          this.$emit('get-all-items')
-        })
-        .catch((response) => console.log(response))
-      this.isOpen = false
-    },
-  },
+interface Props {
+  item?: ItemAddedId | null
+}
+
+interface Emits {
+  (e: 'get-all-items'): void
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  item: () => null,
 })
+const emits = defineEmits<Emits>()
+
+const isOpenRef = ref(false)
+
+const deleteItem = (deleteId: string): void => {
+  axios
+    .delete(`/api/${deleteId}`)
+    .then((response) => {
+      console.log(response)
+      emits('get-all-items')
+      isOpenRef.value = false
+    })
+    .catch((error: AxiosError) => console.log(error))
+}
+
+const deleteAllItems = (): void => {
+  axios
+    .delete('/api')
+    .then((response) => {
+      console.log(response)
+      emits('get-all-items')
+      isOpenRef.value = false
+    })
+    .catch((error: AxiosError) => console.log(error))
+}
 </script>
