@@ -5,11 +5,6 @@ import { ItemPerson, Item } from '../model'
 import StringInput from './StringInput.vue'
 import PositiveIntInput from './PositiveIntInput.vue'
 
-interface Data {
-  tempItem: Item
-  valid: boolean
-}
-
 interface Props {
   initItem: Item
 }
