@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, watchEffect, computed } from 'vue'
-import axios, { AxiosResponse, AxiosError } from 'axios'
+import { ref, reactive, watchEffect } from 'vue'
+import axios, { AxiosError } from 'axios'
 import { ItemAddedId, ItemPerson } from '../model'
 import StringInput from './StringInput.vue'
 import PositiveIntInput from './PositiveIntInput.vue'
