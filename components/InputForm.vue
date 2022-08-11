@@ -17,7 +17,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emits = defineEmits<Emits>()
 
-const tempItem = reactive({
+const tempItem = reactive<Item>({
   name: props.initItem.name,
   persons: props.initItem.persons,
   note: props.initItem.note,

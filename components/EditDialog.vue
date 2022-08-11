@@ -17,7 +17,7 @@ const props = defineProps<Props>()
 const emits = defineEmits<Emits>()
 
 const isOpenRef = ref(false)
-const tempItem: ItemAddedId = reactive({
+const tempItem = reactive<ItemAddedId>({
   _id: '',
   name: '',
   persons: [],
