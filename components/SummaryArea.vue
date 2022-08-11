@@ -1,30 +1,64 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { Person, ItemPerson, ItemAddedId } from '../model'
+
+interface Props {
+  items: ItemAddedId[]
+  persons: Person[]
+}
+
+const props = defineProps<Props>()
+
+const toPaysRef = computed<number[]>(() => {
+  return props.items.reduce(
+    (toPays: number[], item: ItemAddedId) =>
+      item.persons.map((person: ItemPerson, index: number) => toPays[index] + person.toPay - person.paid),
+    Array(props.persons.length).fill(0)
+  )
+})
+const paidsRef = computed<number[]>(() => {
+  return props.items.reduce(
+    (paids: number[], item: ItemAddedId) =>
+      item.persons.map((person: ItemPerson, index: number) => paids[index] - person.toPay + person.paid),
+    Array(props.persons.length).fill(0)
+  )
+})
+const payersRef = computed<Person[]>(() => props.persons.filter((person: Person) => toPaysRef.value[person.index] > 0))
+const receiversRef = computed<Person[]>(() =>
+  props.persons.filter((person: Person) => toPaysRef.value[person.index] < 0)
+)
+const neutralsRef = computed<Person[]>(() =>
+  props.persons.filter((person: Person) => toPaysRef.value[person.index] === 0)
+)
+</script>
+
 <template>
   <div>
-    <template v-if="payers.length > 0">
+    <template v-if="payersRef.length > 0">
       <v-card class="my-2">
         <v-card-title> 支払い </v-card-title>
         <v-card-text>
-          <div v-for="person in payers" :key="person.name">
+          <div v-for="person in payersRef" :key="person.name">
             <div>{{ person.name }}:</div>
-            <div>{{ toPays[person.index] }}円</div>
+            <div>{{ toPaysRef[person.index] }}円</div>
           </div>
         </v-card-text>
       </v-card>
       <v-card class="my-2">
         <v-card-title> 受取り </v-card-title>
         <v-card-text>
-          <div v-for="person in receivers" :key="person.name">
+          <div v-for="person in receiversRef" :key="person.name">
             <div>{{ person.name }}:</div>
-            <div>{{ paids[person.index] }}円</div>
+            <div>{{ paidsRef[person.index] }}円</div>
           </div>
         </v-card-text>
       </v-card>
     </template>
-    <template v-if="neutrals.length > 0">
+    <template v-if="neutralsRef.length > 0">
       <v-card class="my-2">
         <v-card-title> 何もしない </v-card-title>
         <v-card-text>
-          <div v-for="person in neutrals" :key="person.name">
+          <div v-for="person in neutralsRef" :key="person.name">
             <div>
               {{ person.name }}
             </div>
@@ -34,44 +68,3 @@
     </template>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue'
-import { Person, ItemPerson, ItemAddedId } from '../model'
-
-export default Vue.extend({
-  name: 'SummaryArea',
-  props: {
-    items: {
-      type: Array as PropType<ItemAddedId[]>,
-      default: () => [{ _id: '', name: '', persons: [{ index: 0, name: '', paid: 0, toPay: 0 }], note: '' }],
-    },
-    persons: { type: Array as PropType<Person[]>, default: () => [{ index: 0, name: '' }] },
-  },
-  computed: {
-    toPays(): number[] {
-      return this.items.reduce(
-        (toPays: number[], item: ItemAddedId) =>
-          item.persons.map((person: ItemPerson, index: number) => toPays[index] + person.toPay - person.paid),
-        Array(this.persons.length).fill(0)
-      )
-    },
-    paids(): number[] {
-      return this.items.reduce(
-        (paids: number[], item: ItemAddedId) =>
-          item.persons.map((person: ItemPerson, index: number) => paids[index] - person.toPay + person.paid),
-        Array(this.persons.length).fill(0)
-      )
-    },
-    payers(): Person[] {
-      return this.persons.filter((person: Person) => this.toPays[person.index] > 0)
-    },
-    receivers(): Person[] {
-      return this.persons.filter((person: Person) => this.toPays[person.index] < 0)
-    },
-    neutrals(): Person[] {
-      return this.persons.filter((person: Person) => this.toPays[person.index] === 0)
-    },
-  },
-})
-</script>
