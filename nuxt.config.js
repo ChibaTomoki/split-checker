@@ -31,6 +31,8 @@ export default defineNuxtConfig({
   buildModules: [
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    // https://pinia.vuejs.org/ssr/nuxt.html#installation
+    '@pinia/nuxt',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
