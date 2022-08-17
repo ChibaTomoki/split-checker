@@ -36,17 +36,17 @@ app.post('/', async (req, res) => {
   }
 })
 
-app.delete('/', async (req, res) => {
+app.delete('/:id', async (req, res) => {
   console.log('api delete is called')
   try {
-    await Item.deleteOne({ _id: req.body._id })
+    await Item.deleteOne({ _id: req.params.id })
     res.sendStatus(200)
   } catch (error) {
     res.status(500).json(error)
   }
 })
 
-app.delete('/all', async (_, res) => {
+app.delete('/', async (_, res) => {
   console.log('api delete_all is called')
   try {
     await Item.deleteMany({})
@@ -56,10 +56,10 @@ app.delete('/all', async (_, res) => {
   }
 })
 
-app.put('/', async (req, res) => {
+app.put('/:id', async (req, res) => {
   console.log('api put is called')
   try {
-    await Item.replaceOne({ _id: req.body._id }, req.body)
+    await Item.replaceOne({ _id: req.params.id }, req.body)
     res.sendStatus(200)
   } catch (error) {
     res.status(500).json(error)

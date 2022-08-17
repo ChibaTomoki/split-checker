@@ -1,6 +1,7 @@
 import colors from 'vuetify/es5/util/colors'
+import { defineNuxtConfig } from '@nuxt/bridge'
 
-export default {
+export default defineNuxtConfig({
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - split-checker',
@@ -28,10 +29,10 @@ export default {
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
-    // https://go.nuxtjs.dev/typescript
-    '@nuxt/typescript-build',
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    // https://pinia.vuejs.org/ssr/nuxt.html#installation
+    '@pinia/nuxt',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -70,4 +71,4 @@ export default {
 
   serverMiddleware: ['../server/index.ts'],
 
-}
+})

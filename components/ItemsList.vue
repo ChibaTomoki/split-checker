@@ -1,3 +1,27 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { ItemAddedId } from '../model'
+import DeleteDialog from './DeleteDialog.vue'
+import EditDialog from './EditDialog.vue'
+
+interface Props {
+  items: ItemAddedId
+}
+
+interface Emits {
+  (e: 'get-all-items'): void
+}
+
+const props = defineProps<Props>()
+const emits = defineEmits<Emits>()
+
+emits('get-all-items')
+
+const selected = ref<boolean[]>([])
+const showsDetail = ref<boolean[]>([])
+const expanded = ref<boolean[]>([])
+</script>
+
 <template>
   <div>
     <v-data-table
@@ -27,7 +51,7 @@
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <v-data-table
-            v-model="selected2"
+            v-model="showsDetail"
             :headers="[
               { text: '名前', value: 'name' },
               { text: '払った額', value: 'paid' },
@@ -42,31 +66,3 @@
     </v-data-table>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue'
-import { ItemAddedId } from '../model'
-
-interface Data {
-  selected: boolean[]
-  expanded: boolean[]
-}
-
-export default Vue.extend({
-  name: 'ItemsComponent',
-  components: {
-    DeleteDialog: () => import('./DeleteDialog.vue'),
-    EditDialog: () => import('./EditDialog.vue'),
-  },
-  props: {
-    items: {
-      type: Array as PropType<ItemAddedId[]>,
-      default: () => [{ _id: '', name: '', persons: [{ index: 0, name: '', paid: 0, toPay: 0 }], note: '' }],
-    },
-  },
-  data: (): Data => ({
-    selected: [],
-    expanded: [],
-  }),
-})
-</script>
